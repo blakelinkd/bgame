@@ -1,6 +1,7 @@
 // ui.rs
 use bevy::prelude::*;
 
+use bevy::window::CursorGrabMode;
 use bevy::{
     color::palettes::css::GOLD,
     diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin},
@@ -22,6 +23,7 @@ impl Plugin for GameUiPlugin {
             .add_systems(Update, text_update_system)
             .add_systems(Startup, setup)
             .add_systems(Startup, update_fps)
+            .add_systems(Startup, lock_and_hide_cursor)
             .add_plugins(FrameTimeDiagnosticsPlugin::default());
     }
 }
@@ -113,4 +115,10 @@ fn update_fps(diagnostics: Res<DiagnosticsStore>, mut query: Query<&mut Text, Wi
             }
         }
     }
+}
+
+fn lock_and_hide_cursor(mut windows: Query<&mut Window>) {
+    let mut window = windows.single_mut();
+    window.cursor.visible = false;
+    window.cursor.grab_mode = CursorGrabMode::Locked;
 }

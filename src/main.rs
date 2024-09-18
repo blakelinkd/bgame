@@ -9,10 +9,7 @@ use bevy::render::{
 };
 use bevy::input::ButtonInput;
 use bevy::prelude::Res;
-use bevy::window::CursorGrabMode;
 use ui::GameUiPlugin;
-
-
 
 mod debug_settings;
 use debug_settings::{DebugSettings, toggle_debug}; // Import DebugSettings and the toggle function
@@ -34,58 +31,35 @@ struct Health {
 #[derive(Component)]
 struct MyMusic;
 
-
-
-fn main() {
-    App::new()
-        .add_plugins((GameUiPlugin, DefaultPlugins, PhysicsPlugins::default(),
-        projectile::ProjectilePlugin,
-        // PhysicsDebugPlugin::default()
-    ))
-        .insert_gizmo_config(
-            PhysicsGizmos {
-                aabb_color: Some(Color::WHITE),
-                ..default()
-            },
-            GizmoConfig::default(),
-        )
-        .insert_resource(Gravity(Vec3::NEG_Y * 19.6))
-        .insert_resource(DebugSettings::default())
-        .add_systems(Startup, setup)
-        .add_systems(Update, (move_player, toggle_debug))
-        .add_systems(Startup, lock_and_hide_cursor)
-        .run();
-}
-
-
-fn lock_and_hide_cursor(mut windows: Query<&mut Window>) {
-    let mut window = windows.single_mut();
-    window.cursor.visible = false;
-    window.cursor.grab_mode = CursorGrabMode::Locked;
-}
-
-
 #[derive(Component)]
 struct Ground;
 
 #[derive(Component)]
 struct Shape;
 
-#[derive(Component)]
-struct Projectile {
-    velocity: Vec3,
-}
-
-impl Default for Projectile {
-    fn default() -> Self {
-        Self {
-            velocity: Vec3::ZERO,
-        }
-    }
-}
 
 const SHAPES_X_EXTENT: f32 = 14.0;
 const Z_EXTENT: f32 = 5.0;
+
+fn main() {
+    App::new()
+    .add_plugins((GameUiPlugin, DefaultPlugins, PhysicsPlugins::default(),
+    projectile::ProjectilePlugin,
+    // PhysicsDebugPlugin::default()
+))
+.insert_gizmo_config(
+    PhysicsGizmos {
+        aabb_color: Some(Color::WHITE),
+        ..default()
+    },
+    GizmoConfig::default(),
+        )
+        .insert_resource(Gravity(Vec3::NEG_Y * 19.6))
+        .insert_resource(DebugSettings::default())
+        .add_systems(Startup, setup)
+        .add_systems(Update, (move_player, toggle_debug))
+        .run();
+}
 
 fn move_player(
     mut mouse_motion: EventReader<MouseMotion>,
@@ -125,10 +99,6 @@ fn move_player(
         std::process::exit(0);
     }
 
-    
-
-
-
     if keyboard_input.just_pressed(KeyCode::Space) && health.is_alive {
         // Apply an upward force to simulate a jump
         external_impulse.apply_impulse(Vec3::Y * 80.0);
@@ -155,8 +125,6 @@ fn setup(
         meshes.add(Cylinder::default()),
         meshes.add(Cone::default()),
         meshes.add(ConicalFrustum::default()),
-        // meshes.add(Sphere::default().mesh().ico(5).unwrap()),
-        // meshes.add(Sphere::default().mesh().uv(32, 18)),
     ];
 
     let num_shapes = shapes.len();
