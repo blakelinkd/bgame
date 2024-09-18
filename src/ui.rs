@@ -1,5 +1,4 @@
 // ui.rs
-
 use bevy::prelude::*;
 
 use bevy::{
@@ -21,7 +20,9 @@ impl Plugin for GameUiPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, text_color_system)
             .add_systems(Update, text_update_system)
-            .add_systems(Startup, setup);
+            .add_systems(Startup, setup)
+            .add_systems(Startup, update_fps)
+            .add_plugins(FrameTimeDiagnosticsPlugin::default());
     }
 }
 
@@ -63,14 +64,7 @@ fn setup(asset_server: Res<AssetServer>, mut commands: Commands,) {
                     ..default()
                 },
             ),
-            TextSection::from_style(if cfg!(feature = "default_font") {
-                TextStyle {
-                    font_size: 60.0,
-                    color: GOLD.into(),
-                    // If no font is specified, the default font (a minimal subset of FiraMono) will be used.
-                    ..default()
-                }
-            } else {
+            TextSection::from_style( {
                 // "default_font" feature is unavailable, load a font to use instead.
                 TextStyle {
                     font: asset_server.load("fonts/FiraMono-Medium.ttf"),
@@ -82,20 +76,8 @@ fn setup(asset_server: Res<AssetServer>, mut commands: Commands,) {
         FpsText,
     ));
 
-    #[cfg(feature = "default_font")]
-    commands.spawn(
-        // Here we are able to call the `From` method instead of creating a new `TextSection`.
-        // This will use the default font (a minimal subset of FiraMono) and apply the default styling.
-        TextBundle::from("From an &str into a TextBundle with the default font!").with_style(
-            Style {
-                position_type: PositionType::Absolute,
-                bottom: Val::Px(5.0),
-                left: Val::Px(15.0),
-                ..default()
-            },
-        ),
-    );
 }
+
 fn text_color_system(time: Res<Time>, mut query: Query<&mut Text, With<ColorText>>) {
     for mut text in &mut query {
         let seconds = time.elapsed_seconds();
@@ -118,6 +100,16 @@ fn text_update_system(
             if let Some(value) = fps.smoothed() {
                 // Update the value of the second section
                 text.sections[1].value = format!("{value:.2}");
+            }
+        }
+    }
+}
+
+fn update_fps(diagnostics: Res<DiagnosticsStore>, mut query: Query<&mut Text, With<FpsText>>) {
+    if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
+        if let Some(fps_avg) = fps.average() {
+            for mut text in query.iter_mut() {
+                text.sections[1].value = format!("{:.1}", fps_avg); // Update FPS value
             }
         }
     }

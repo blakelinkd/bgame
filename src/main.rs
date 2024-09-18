@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use bevy::prelude::*;
 use avian3d::prelude::*;
-use bevy::input::mouse::{MouseButton, MouseMotion};
+use bevy::input::mouse::MouseMotion;
 use bevy::render::{
     render_asset::RenderAssetUsages,
     render_resource::{Extent3d, TextureDimension, TextureFormat},
@@ -183,6 +183,14 @@ fn setup(
                     ..default()
                 }
                 .into(),
+                ..default()
+            },
+            FogSettings {
+                color: Color::srgb(0.25, 0.25, 0.25),
+                falloff: FogFalloff::Linear {
+                    start: 5.0,
+                    end: 20.0,
+                },
                 ..default()
             },
         ));
