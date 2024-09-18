@@ -14,6 +14,8 @@ use ui::GameUiPlugin;
 
 
 
+mod debug_settings;
+use debug_settings::{DebugSettings, toggle_debug}; // Import DebugSettings and the toggle function
 
 mod projectile;
 mod ui;
@@ -38,7 +40,8 @@ fn main() {
     App::new()
         .add_plugins((GameUiPlugin, DefaultPlugins, PhysicsPlugins::default(),
         projectile::ProjectilePlugin,
-        PhysicsDebugPlugin::default()))
+        // PhysicsDebugPlugin::default()
+    ))
         .insert_gizmo_config(
             PhysicsGizmos {
                 aabb_color: Some(Color::WHITE),
@@ -47,8 +50,9 @@ fn main() {
             GizmoConfig::default(),
         )
         .insert_resource(Gravity(Vec3::NEG_Y * 19.6))
+        .insert_resource(DebugSettings::default())
         .add_systems(Startup, setup)
-        .add_systems(Update, move_player)
+        .add_systems(Update, (move_player, toggle_debug))
         .add_systems(Startup, lock_and_hide_cursor)
         .run();
 }
@@ -121,12 +125,15 @@ fn move_player(
         std::process::exit(0);
     }
 
+    
+
 
 
     if keyboard_input.just_pressed(KeyCode::Space) && health.is_alive {
         // Apply an upward force to simulate a jump
         external_impulse.apply_impulse(Vec3::Y * 80.0);
     }
+
 }
 
 fn setup(
@@ -173,7 +180,8 @@ fn setup(
         ExternalImpulse::default(),
         Health { is_alive: true }, // Initialize the player as alive
         LockedAxes::ROTATION_LOCKED, // Lock the rotation axes
-        DebugRender::default().with_collider_color(Color::srgb(0.0, 1.0, 0.0)),
+        // DebugRender::default().with_collider_color(Color::srgb(0.0, 1.0, 0.0)),
+        
     )).with_children(|parent| {
         parent.spawn((
             WorldModelCamera,
@@ -221,7 +229,7 @@ fn setup(
             Shape,
             RigidBody::Dynamic,
             collider,
-            DebugRender::default().with_collider_color(Color::srgb(1.0, 0.0, 0.0)),
+            // DebugRender::default().with_collider_color(Color::srgb(1.0, 0.0, 0.0)),
         ));
     }
 
