@@ -107,6 +107,7 @@ fn move_player(
 }
 
 fn setup(
+    debug_settings: ResMut<DebugSettings>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut images: ResMut<Assets<Image>>,
@@ -148,7 +149,9 @@ fn setup(
         ExternalImpulse::default(),
         Health { is_alive: true }, // Initialize the player as alive
         LockedAxes::ROTATION_LOCKED, // Lock the rotation axes
-        // DebugRender::default().with_collider_color(Color::srgb(0.0, 1.0, 0.0)),
+        if debug_settings.enable_debug_rendering {
+            DebugRender::default().with_collider_color(Color::srgb(0.0, 1.0, 0.0));
+        }
         
     )).with_children(|parent| {
         parent.spawn((
@@ -197,7 +200,9 @@ fn setup(
             Shape,
             RigidBody::Dynamic,
             collider,
-            // DebugRender::default().with_collider_color(Color::srgb(1.0, 0.0, 0.0)),
+            if debug_settings.enable_debug_rendering {
+                DebugRender::default().with_collider_color(Color::srgb(1.0, 0.0, 0.0));
+            }
         ));
     }
 
